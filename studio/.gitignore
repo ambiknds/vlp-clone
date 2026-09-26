@@ -1,0 +1,10 @@
+# dependencies
+node_modules/
+
+# sanity local files & builds
+.sanity/
+dist/
+
+# misc
+.DS_Store
+*.local

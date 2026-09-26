@@ -12,3 +12,4 @@ export * from "./LessonCardVideo";
 export * from "./LessonCardLesson";
 export * from "./ResourceCard";
 export * from "./HeaderNav";
+export * from "./PortableText";
