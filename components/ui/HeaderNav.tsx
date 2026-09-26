@@ -1,8 +1,11 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { VertexLogo } from "./VertexLogo";
 import { Bell, Search } from "lucide-react";
 import { twMerge } from "tailwind-merge";
+import { SignInButton, SignUpButton, Show, UserButton } from "@clerk/nextjs";
 
 export interface HeaderNavProps {
   activeTab?: "courses" | "my-learning" | "search" | "none";
@@ -16,7 +19,6 @@ export function HeaderNav({
   activeTab = "none",
   className = "",
   showSearch = false,
-  avatarUrl = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120&q=80",
   onTabChange,
 }: HeaderNavProps) {
   return (
@@ -68,7 +70,7 @@ export function HeaderNav({
         </nav>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {showSearch && (
           <button
             type="button"
@@ -85,18 +87,37 @@ export function HeaderNav({
         >
           <Bell className="w-5 h-5 stroke-[1.75]" />
         </button>
-        {avatarUrl ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            src={avatarUrl}
-            alt="User avatar"
-            className="w-9 h-9 rounded-full object-cover ring-1 ring-black/5 cursor-pointer hover:opacity-90 transition-opacity"
-          />
-        ) : (
-          <div className="w-9 h-9 rounded-full bg-[#E2E8F0] border border-[#CBD5E1] flex items-center justify-center font-bold text-[13px] text-[#334155] cursor-pointer">
-            VL
+
+        <Show when="signed-out">
+          <div className="flex items-center gap-2.5">
+            <SignInButton mode="modal">
+              <button
+                type="button"
+                className="text-[14px] font-medium text-[#0F172A] hover:text-[#F97316] px-3.5 py-1.5 rounded-lg transition-colors cursor-pointer"
+              >
+                Sign In
+              </button>
+            </SignInButton>
+            <SignUpButton mode="modal">
+              <button
+                type="button"
+                className="text-[14px] font-medium text-white bg-[#F97316] hover:bg-[#EA580C] px-4 py-1.5 rounded-lg transition-colors cursor-pointer shadow-xs"
+              >
+                Sign Up
+              </button>
+            </SignUpButton>
           </div>
-        )}
+        </Show>
+
+        <Show when="signed-in">
+          <UserButton
+            appearance={{
+              elements: {
+                avatarBox: "w-9 h-9 ring-1 ring-black/5",
+              },
+            }}
+          />
+        </Show>
       </div>
     </header>
   );
