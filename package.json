@@ -9,7 +9,8 @@
     "lint": "eslint",
     "studio": "npm run dev --prefix studio",
     "studio:build": "npm run build --prefix studio",
-    "typegen": "npm run typegen --prefix studio"
+    "typegen": "npm run typegen --prefix studio",
+    "sanity:seed": "npm run seed --prefix studio"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.7",
