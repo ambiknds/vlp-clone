@@ -1,11 +1,12 @@
-"use client";
-
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { HeaderNav, CourseCard } from "@/components/ui";
 import { SteppedColumnsGraphic } from "@/components/home/SteppedColumnsGraphic";
-import { Search, ArrowRight, Star } from "lucide-react";
+import { HeroSearchBar } from "@/components/home/HeroSearchBar";
+import { ArrowRight, Star } from "lucide-react";
+import { sanityFetch } from "@/sanity/lib/fetch";
+import { homepageCoursesQuery } from "@/sanity/lib/queries";
+import type { CourseCardItem } from "@/types/sanity";
 
 // Custom Docker Whale SVG Icon matching vertex-home.png
 function DockerIcon() {
@@ -71,16 +72,51 @@ function NextjsIcon() {
   );
 }
 
-export default function HomePage() {
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
+export default async function HomePage() {
+  // Fetch showcase courses from seeded Sanity dataset
+  const rawCourses = await sanityFetch<CourseCardItem[]>({
+    query: homepageCoursesQuery,
+  }).catch(() => []);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
+  // Match each course from Sanity
+  const nextCourse = rawCourses.find((c) => c.slug?.current?.includes("nextjs"));
+  const dockerCourse = rawCourses.find(
+    (c) => c.slug?.current?.includes("docker") || c.slug?.current?.includes("devops")
+  );
+  const tsCourse = rawCourses.find((c) => c.slug?.current?.includes("typescript"));
+
+  const displayCourses = [
+    {
+      id: nextCourse?._id || "course-nextjs",
+      href: "/courses/nextjs-for-production",
+      title: "Next.js for Production",
+      description: nextCourse?.summary || "Build scalable, high-performance web applications with Next.js.",
+      level: nextCourse?.level ? (nextCourse.level.charAt(0).toUpperCase() + nextCourse.level.slice(1)) : "Intermediate",
+      duration: "18h 24m",
+      moduleCount: 12,
+      icon: <NextjsIcon />,
+    },
+    {
+      id: dockerCourse?._id || "course-docker",
+      href: `/courses/${dockerCourse?.slug?.current || "devops-with-docker-and-kubernetes"}`,
+      title: dockerCourse?.title || "DevOps with Docker and Kubernetes",
+      description: dockerCourse?.summary || "Containerise an application, run it on Kubernetes, ship it through a pipeline, and operate it once it is live.",
+      level: dockerCourse?.level ? (dockerCourse.level.charAt(0).toUpperCase() + dockerCourse.level.slice(1)) : "Advanced",
+      duration: dockerCourse?.duration || "2h 39m",
+      moduleCount: dockerCourse?.moduleCount || 4,
+      icon: <DockerIcon />,
+    },
+    {
+      id: tsCourse?._id || "course-ts",
+      href: `/courses/${tsCourse?.slug?.current || "typescript-for-application-developers"}`,
+      title: tsCourse?.title || "TypeScript for Application Developers",
+      description: tsCourse?.summary || "Go past annotations. Structural typing, narrowing, generics, and the type-level tools that make invalid states impossible.",
+      level: tsCourse?.level ? (tsCourse.level.charAt(0).toUpperCase() + tsCourse.level.slice(1)) : "Intermediate",
+      duration: tsCourse?.duration || "1h 54m",
+      moduleCount: tsCourse?.moduleCount || 4,
+      icon: <TypeScriptIcon />,
+    },
+  ];
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF8F5] text-[#0F172A] selection:bg-[#FED7AA] selection:text-[#9A3412]">
@@ -128,27 +164,12 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* Search Input Bar */}
-            <form
-              onSubmit={handleSearchSubmit}
-              className="mt-8 w-full max-w-[620px] bg-white border border-[#E2E8F0] hover:border-[#CBD5E1] focus-within:border-[#F97316] focus-within:ring-2 focus-within:ring-[#F97316]/20 rounded-[14px] shadow-sm px-4 py-3.5 flex items-center gap-3 transition-all"
-            >
-              <Search className="w-5 h-5 text-[#94A3B8] shrink-0 stroke-[1.75]" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Ask anything about your learning..."
-                className="w-full bg-transparent border-none outline-none text-[15px] text-[#0F172A] placeholder:text-[#94A3B8] font-sans"
-              />
-              <div className="shrink-0 flex items-center justify-center px-2 py-1 rounded-[6px] border border-[#E2E8F0] bg-[#F8FAFC] text-[12px] font-medium text-[#64748B] select-none">
-                ⌘ K
-              </div>
-            </form>
+            {/* Search Input Bar (Client Component) */}
+            <HeroSearchBar />
           </section>
 
           {/* ========================================================================= */}
-          {/* ALL COURSES SECTION                                                      */}
+          {/* ALL COURSES SECTION (WIRED TO SANITY CONTENT)                              */}
           {/* ========================================================================= */}
           <section className="mt-20 sm:mt-24 w-full">
             {/* Section Header */}
@@ -167,35 +188,22 @@ export default function HomePage() {
 
             {/* Course Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Course 1: Next.js for Production */}
-              <CourseCard
-                title="Next.js for Production"
-                description="Build scalable, high-performance web applications with Next.js."
-                level="Intermediate"
-                duration="18h 24m"
-                moduleCount={12}
-                icon={<NextjsIcon />}
-              />
-
-              {/* Course 2: Docker Essentials */}
-              <CourseCard
-                title="Docker Essentials"
-                description="Containerize applications and streamline your development workflow."
-                level="Beginner"
-                duration="10h 12m"
-                moduleCount={8}
-                icon={<DockerIcon />}
-              />
-
-              {/* Course 3: TypeScript Deep Dive */}
-              <CourseCard
-                title="TypeScript Deep Dive"
-                description="Go beyond the basics and write safer, more expressive code."
-                level="Intermediate"
-                duration="14h 36m"
-                moduleCount={10}
-                icon={<TypeScriptIcon />}
-              />
+              {displayCourses.map((course) => (
+                <Link
+                  key={course.id}
+                  href={course.href}
+                  className="block focus:outline-none"
+                >
+                  <CourseCard
+                    title={course.title}
+                    description={course.description}
+                    level={course.level}
+                    duration={course.duration}
+                    moduleCount={course.moduleCount}
+                    icon={course.icon}
+                  />
+                </Link>
+              ))}
             </div>
           </section>
 

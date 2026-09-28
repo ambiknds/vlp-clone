@@ -238,3 +238,29 @@ export const allCategoriesQuery = defineQuery(`
     "courseCount": count(*[_type == "course" && references(^._id)])
   }
 `)
+
+/**
+ * Fetches the showcase courses for the homepage grid.
+ */
+export const homepageCoursesQuery = defineQuery(`
+  *[_type == "course" && slug.current in [
+    "nextjs-app-router-in-depth",
+    "nextjs-for-production",
+    "devops-with-docker-and-kubernetes",
+    "typescript-for-application-developers"
+  ]] {
+    _id,
+    title,
+    slug,
+    summary,
+    coverImage,
+    badgeIcon,
+    level,
+    duration,
+    price,
+    popular,
+    studentCount,
+    "moduleCount": count(modules),
+    "lessonCount": count(modules[].lessons[])
+  }
+`)

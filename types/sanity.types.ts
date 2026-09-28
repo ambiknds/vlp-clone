@@ -657,3 +657,28 @@ export type AllCategoriesQueryResult = Array<{
   courseCount: number;
 }>;
 
+// Source: ../sanity/lib/queries.ts
+// Variable: homepageCoursesQuery
+// Query: *[_type == "course" && slug.current in [    "nextjs-app-router-in-depth",    "nextjs-for-production",    "devops-with-docker-and-kubernetes",    "typescript-for-application-developers"  ]] {    _id,    title,    slug,    summary,    coverImage,    badgeIcon,    level,    duration,    price,    popular,    studentCount,    "moduleCount": count(modules),    "lessonCount": count(modules[].lessons[])  }
+export type HomepageCoursesQueryResult = Array<{
+  _id: string;
+  title: string;
+  slug: Slug;
+  summary: string;
+  coverImage: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  } | null;
+  badgeIcon: "database" | "docker" | "nextjs" | "python" | "react" | "typescript" | null;
+  level: "Advanced" | "All Levels" | "Beginner" | "Intermediate";
+  duration: string | null;
+  price: number | null;
+  popular: boolean | null;
+  studentCount: number | null;
+  moduleCount: number | null;
+  lessonCount: number | null;
+}>;
+
