@@ -155,6 +155,8 @@ export const lessonBySlugQuery = defineQuery(`
       _id,
       title,
       slug,
+      level,
+      badgeIcon,
       "instructor": instructor->{
         name,
         expertise,
@@ -169,6 +171,7 @@ export const lessonBySlugQuery = defineQuery(`
           title,
           slug,
           duration,
+          durationSeconds,
           freePreview
         }
       }
