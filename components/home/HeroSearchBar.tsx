@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
+import posthog from "posthog-js";
 
 export function HeroSearchBar() {
   const router = useRouter();
@@ -10,8 +11,12 @@ export function HeroSearchBar() {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    const query = searchQuery.trim();
+    if (query) {
+      posthog.capture("learning_search_submitted", {
+        query_length: query.length,
+      });
+      router.push(`/search?q=${encodeURIComponent(query)}`);
     }
   };
 

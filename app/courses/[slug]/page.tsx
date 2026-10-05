@@ -228,6 +228,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
         {/* Hero Section */}
         <CourseHero
           title={pageTitle}
+          courseSlug={slug}
           summary={pageSummary}
           level={course.level}
           duration={pageDuration}

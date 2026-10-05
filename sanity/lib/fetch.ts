@@ -1,5 +1,7 @@
 import 'server-only'
+import { after } from 'next/server'
 import { client } from './client'
+import { flushPostHogLogs, logSanityFetchCompleted, logSanityFetchFailed } from '@/instrumentation'
 import type { QueryParams } from 'next-sanity'
 
 export interface SanityFetchOptions {
@@ -23,10 +25,21 @@ export async function sanityFetch<T>({
   revalidate?: number | false
   tags?: string[]
 }): Promise<T> {
-  return client.fetch<T>(query, params, {
-    next: {
-      revalidate: revalidate === false ? 0 : revalidate,
-      tags,
-    },
-  })
+  try {
+    const result = await client.fetch<T>(query, params, {
+      next: {
+        revalidate: revalidate === false ? 0 : revalidate,
+        tags,
+      },
+    })
+
+    logSanityFetchCompleted(revalidate)
+    after(flushPostHogLogs)
+
+    return result
+  } catch (error) {
+    logSanityFetchFailed()
+    after(flushPostHogLogs)
+    throw error
+  }
 }

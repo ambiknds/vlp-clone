@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { CourseCard } from "@/components/ui/CourseCard";
 import { getBadgeIcon } from "./CourseIcons";
+import posthog from "posthog-js";
 import type { CourseCardItem, Category } from "@/types/sanity";
 
 interface CourseCatalogClientProps {
@@ -19,13 +20,22 @@ export function CourseCatalogClient({ courses, categories }: CourseCatalogClient
     return course.category?.slug?.current === selectedCategory || course.category?._id === selectedCategory;
   });
 
+  const selectCategory = (category: string) => {
+    if (category === selectedCategory) return;
+
+    posthog.capture("course_category_selected", {
+      category_slug: category,
+    });
+    setSelectedCategory(category);
+  };
+
   return (
     <div className="w-full flex flex-col gap-8">
       {/* Category Filter Pills */}
       <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
         <button
           type="button"
-          onClick={() => setSelectedCategory("all")}
+          onClick={() => selectCategory("all")}
           className={`px-4 py-2 rounded-[12px] text-[13.5px] font-medium transition-all duration-150 cursor-pointer ${
             selectedCategory === "all"
               ? "bg-[#0F172A] text-white shadow-xs"
@@ -48,7 +58,7 @@ export function CourseCatalogClient({ courses, categories }: CourseCatalogClient
             <button
               key={cat._id}
               type="button"
-              onClick={() => setSelectedCategory(catSlug)}
+              onClick={() => selectCategory(catSlug)}
               className={`px-4 py-2 rounded-[12px] text-[13.5px] font-medium transition-all duration-150 cursor-pointer ${
                 isActive
                   ? "bg-[#0F172A] text-white shadow-xs"
@@ -97,7 +107,7 @@ export function CourseCatalogClient({ courses, categories }: CourseCatalogClient
           </p>
           <button
             type="button"
-            onClick={() => setSelectedCategory("all")}
+            onClick={() => selectCategory("all")}
             className="mt-4 px-4 py-2 rounded-[10px] bg-[#EA580C] text-white text-[14px] font-medium hover:bg-[#D94F06] transition-colors cursor-pointer"
           >
             View all courses

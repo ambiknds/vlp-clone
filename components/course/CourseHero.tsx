@@ -15,6 +15,7 @@ interface CourseHeroProps {
   popular?: boolean;
   coverImage?: SanityImageReference;
   badgeIcon?: string;
+  courseSlug: string;
   firstLessonSlug?: string;
 }
 
@@ -92,6 +93,7 @@ export function CourseHero({
   studentCount = 2100,
   popular = true,
   coverImage,
+  courseSlug,
   firstLessonSlug,
 }: CourseHeroProps) {
   const imageUrl = coverImage?.asset ? urlFor(coverImage).width(680).height(680).url() : null;
@@ -155,7 +157,7 @@ export function CourseHero({
         </div>
 
         {/* Action CTAs */}
-        <CourseHeroActions firstLessonSlug={firstLessonSlug} />
+        <CourseHeroActions courseSlug={courseSlug} firstLessonSlug={firstLessonSlug} />
       </div>
     </section>
   );

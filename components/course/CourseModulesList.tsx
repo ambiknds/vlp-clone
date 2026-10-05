@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { ChevronDown, Play } from "lucide-react";
+import posthog from "posthog-js";
 
 export interface LessonSummary {
   _id: string;
@@ -44,7 +45,11 @@ export function CourseModulesList({
   const [showAll, setShowAll] = useState(false);
   const [expandedModules, setExpandedModules] = useState<Record<number, boolean>>({});
 
-  const toggleModule = (index: number) => {
+  const toggleModule = (index: number, isExpanded: boolean) => {
+    posthog.capture("course_module_toggled", {
+      module_number: index + 1,
+      expanded: !isExpanded,
+    });
     setExpandedModules((prev) => ({
       ...prev,
       [index]: !prev[index],
@@ -90,7 +95,7 @@ export function CourseModulesList({
               {/* Module Header Row */}
               <button
                 type="button"
-                onClick={() => toggleModule(index)}
+                onClick={() => toggleModule(index, isExpanded)}
                 className="w-full flex items-center justify-between p-4 sm:p-5 text-left cursor-pointer gap-4"
                 aria-expanded={isExpanded}
               >
@@ -144,6 +149,13 @@ export function CourseModulesList({
                             {lessonSlug ? (
                               <Link
                                 href={`/lessons/${lessonSlug}`}
+                                onClick={() =>
+                                  posthog.capture("course_lesson_selected", {
+                                    module_number: moduleNumber,
+                                    lesson_number: lessonIdx + 1,
+                                    is_free_preview: Boolean(lesson.freePreview),
+                                  })
+                                }
                                 className="font-medium text-[#0F172A] hover:text-[#EA580C] truncate transition-colors"
                               >
                                 {lesson.title}

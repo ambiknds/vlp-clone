@@ -1,11 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import { VertexLogo } from "./VertexLogo";
 import { Bell, Search } from "lucide-react";
 import { twMerge } from "tailwind-merge";
-import { SignInButton, SignUpButton, Show, UserButton } from "@clerk/nextjs";
+import { SignInButton, SignUpButton, Show, UserButton, useUser } from "@clerk/nextjs";
+import posthog from "posthog-js";
 
 export interface HeaderNavProps {
   activeTab?: "courses" | "my-learning" | "search" | "none";
@@ -21,6 +22,35 @@ export function HeaderNav({
   showSearch = false,
   onTabChange,
 }: HeaderNavProps) {
+  const { isLoaded, user } = useUser();
+  const identifiedUserId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    if (!user) {
+      if (identifiedUserId.current) {
+        posthog.reset();
+      }
+      identifiedUserId.current = null;
+      return;
+    }
+
+    if (identifiedUserId.current === user.id) return;
+
+    if (identifiedUserId.current) {
+      posthog.reset();
+    }
+
+    posthog.identify(user.id, {
+      ...(user.primaryEmailAddress?.emailAddress
+        ? { email: user.primaryEmailAddress.emailAddress }
+        : {}),
+      ...(user.fullName ? { name: user.fullName } : {}),
+    });
+    identifiedUserId.current = user.id;
+  }, [isLoaded, user]);
+
   return (
     <header
       className={twMerge(
