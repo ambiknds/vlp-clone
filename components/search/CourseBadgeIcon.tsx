@@ -62,6 +62,24 @@ export function CourseBadgeIcon({
           <span className="text-[#FFD43B] text-[10px] font-bold font-sans">Py</span>
         </div>
       );
+    case "nodejs":
+    case "node":
+      return (
+        <div
+          className={`${className} bg-[#16A34A] flex items-center justify-center shrink-0 shadow-2xs`}
+        >
+          <span className="text-white text-[10px] font-bold font-sans">JS</span>
+        </div>
+      );
+    case "javascript":
+    case "js":
+      return (
+        <div
+          className={`${className} bg-[#F7DF1E] flex items-center justify-center shrink-0 shadow-2xs`}
+        >
+          <span className="text-[#000000] text-[10px] font-bold font-sans">JS</span>
+        </div>
+      );
     case "database":
     default:
       return (

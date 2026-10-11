@@ -1,0 +1,104 @@
+[
+  {
+    "_id": "video.yt_u57EnkQaUTY",
+    "_type": "video",
+    "videoId": "u57EnkQaUTY",
+    "url": "https://www.youtube.com/watch?v=u57EnkQaUTY",
+    "provider": "youtube",
+    "chapters": [
+      {
+        "_key": "ch_000",
+        "startSeconds": 0,
+        "label": "Overview & Context"
+      },
+      {
+        "_key": "ch_001",
+        "startSeconds": 136,
+        "label": "Cache stable prompt prefixes to cut cost"
+      },
+      {
+        "_key": "ch_002",
+        "startSeconds": 272,
+        "label": "Retry with exponential backoff on rate limits"
+      },
+      {
+        "_key": "ch_003",
+        "startSeconds": 408,
+        "label": "Queue or shed load instead of failing hard"
+      }
+    ],
+    "chunks": [
+      {
+        "_key": "chunk_000",
+        "startSeconds": 273,
+        "text": "Repeated prefixes can be cached, repeated questions can be answered from your own cache, and rate limits will find you eventually — so retry with backoff.\n\nWhat this lesson covers\n\nCache stable prompt prefixes to cut cost\n\nRetry with exponential backoff on rate limits\n\nQueue or shed load instead of failing hard\n\nThis lesson sits in Shipping to Production, part of Building AI Apps with LLMs. It assumes what came before it and leads directly into the next lesson in the module."
+      }
+    ]
+  },
+  {
+    "_id": "video.yt_GErEgIOMy_4",
+    "_type": "video",
+    "videoId": "GErEgIOMy_4",
+    "url": "https://www.youtube.com/watch?v=GErEgIOMy_4",
+    "provider": "youtube",
+    "chapters": [
+      {
+        "_key": "ch_000",
+        "startSeconds": 0,
+        "label": "Demo – Agent writes and runs Hello World"
+      },
+      {
+        "_key": "ch_001",
+        "startSeconds": 22,
+        "label": "What is OpenClaw?"
+      },
+      {
+        "_key": "ch_002",
+        "startSeconds": 114,
+        "label": "Overview of today’s build"
+      },
+      {
+        "_key": "ch_003",
+        "startSeconds": 160,
+        "label": "The Agent Loop explained"
+      },
+      {
+        "_key": "ch_004",
+        "startSeconds": 259,
+        "label": "Code walkthrough (loop.py)"
+      },
+      {
+        "_key": "ch_005",
+        "startSeconds": 489,
+        "label": "Tools architecture"
+      },
+      {
+        "_key": "ch_006",
+        "startSeconds": 667,
+        "label": "Session storage (JSONL)"
+      },
+      {
+        "_key": "ch_007",
+        "startSeconds": 720,
+        "label": "Live CLI demo"
+      },
+      {
+        "_key": "ch_008",
+        "startSeconds": 871,
+        "label": "File system + session inspection"
+      },
+      {
+        "_key": "ch_009",
+        "startSeconds": 915,
+        "label": "What’s next (Personality)"
+      }
+    ],
+    "chunks": [
+      {
+        "_key": "chunk_000",
+        "startSeconds": 475,
+        "text": "An agent is a loop: call the model, run the tool it asked for, feed the result back, repeat. Every loop needs a stopping condition it cannot argue with.\n\nWhat this lesson covers\n\nStructure the call, execute, feed back cycle\n\nBound the loop with iteration and token limits\n\nLog each step so failures can be replayed\n\nThis lesson sits in Tool Calling and Agents, part of Building AI Apps with LLMs. It assumes what came before it and leads directly into the next lesson in the module."
+      }
+    ]
+  }
+]

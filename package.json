@@ -10,7 +10,8 @@
     "studio": "npm run dev --prefix studio",
     "studio:build": "npm run build --prefix studio",
     "typegen": "npm run typegen --prefix studio",
-    "sanity:seed": "npm run seed --prefix studio"
+    "sanity:seed": "npm run seed --prefix studio",
+    "video:ingest": "tsx scripts/video-pipeline/cli.ts"
   },
   "dependencies": {
     "@ai-sdk/mcp": "^2.0.73",

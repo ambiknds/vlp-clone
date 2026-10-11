@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { FileText, CheckCircle2, ExternalLink, ChevronRight } from "lucide-react";
+import { FileText, ExternalLink, ChevronRight } from "lucide-react";
 import { CourseBadgeIcon } from "./CourseBadgeIcon";
 import type { LessonSearchResult } from "@/types/search";
 import posthog from "posthog-js";
@@ -39,14 +39,26 @@ export function SearchResultCardLesson({
         className="w-full md:w-[260px] h-[155px] rounded-[12px] bg-[#F8FAFC] border border-[#E2E8F0]/80 p-4 relative shrink-0 flex flex-col justify-between cursor-pointer hover:bg-[#F1F5F9] transition-colors shadow-2xs group/box"
       >
         <div className="min-w-0">
-          <div className="flex items-center gap-2 mb-2 text-[#64748B]">
-            <FileText className="w-4 h-4 text-[#94A3B8]" />
-            <span className="text-[11.5px] font-semibold uppercase tracking-wider text-[#94A3B8]">
-              Lesson Highlights
-            </span>
+          <div className="mb-2.5">
+            {result.courseBadgeIcon === "react" ? (
+              <svg
+                className="w-4.5 h-4.5 text-[#087EA4]"
+                viewBox="-11.5 -10.23174 23 20.46348"
+                fill="currentColor"
+              >
+                <circle cx="0" cy="0" r="2.05" />
+                <g stroke="currentColor" strokeWidth="1" fill="none">
+                  <ellipse rx="11" ry="4.2" />
+                  <ellipse rx="11" ry="4.2" transform="rotate(60)" />
+                  <ellipse rx="11" ry="4.2" transform="rotate(120)" />
+                </g>
+              </svg>
+            ) : (
+              <FileText className="w-4.5 h-4.5 text-[#94A3B8]" />
+            )}
           </div>
 
-          <ul className="space-y-1.5 text-[12px] sm:text-[12.5px] text-[#475569] leading-snug">
+          <ul className="space-y-1.5 text-[12.5px] text-[#475569] leading-snug">
             {keyPoints.length > 0 ? (
               keyPoints.map((kp, idx) => (
                 <li key={idx} className="flex items-start gap-1.5 line-clamp-1">
@@ -58,15 +70,15 @@ export function SearchResultCardLesson({
               <>
                 <li className="flex items-start gap-1.5">
                   <span className="text-[#94A3B8]">•</span>
-                  <span>Core concepts & architecture</span>
+                  <span>Fetching strategies</span>
                 </li>
                 <li className="flex items-start gap-1.5">
                   <span className="text-[#94A3B8]">•</span>
-                  <span>Practical code examples</span>
+                  <span>Caching techniques</span>
                 </li>
                 <li className="flex items-start gap-1.5">
                   <span className="text-[#94A3B8]">•</span>
-                  <span>Best practices & performance</span>
+                  <span>Revalidation methods</span>
                 </li>
               </>
             )}
@@ -74,8 +86,12 @@ export function SearchResultCardLesson({
         </div>
 
         {/* Bottom Right Checkmark Icon */}
-        <div className="self-end text-[#94A3B8] group-hover/box:text-[#64748B] transition-colors">
-          <CheckCircle2 className="w-4 h-4" />
+        <div className="self-end">
+          <div className="w-4.5 h-4.5 rounded-full bg-[#475569] text-white flex items-center justify-center shadow-2xs">
+            <svg className="w-2.5 h-2.5 stroke-white stroke-[2.5] fill-none" viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
         </div>
       </Link>
 
@@ -115,8 +131,6 @@ export function SearchResultCardLesson({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3.5 border-t border-[#F1F5F9]">
           <div className="flex items-center gap-2 text-[13px] text-[#64748B]">
             <span className="font-medium text-[#64748B]">{result.moduleLabel}</span>
-            <span className="text-[#CBD5E1]">•</span>
-            <span>{result.moduleTitle}</span>
           </div>
 
           <Link

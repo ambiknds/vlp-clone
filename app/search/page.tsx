@@ -58,7 +58,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
       />
 
       {/* Top Header Navigation */}
-      <HeaderNav activeTab="none" showSearch={false} />
+      <HeaderNav activeTab="courses" showSearch={false} />
 
       {/* Main Search View Area */}
       <main className="flex-1 flex flex-col items-center w-full">
@@ -69,7 +69,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
           {/* Eyebrow Badge */}
           <div className="inline-flex items-center px-3.5 py-1 rounded-[8px] bg-[#FFEEE5] border border-[#FED7AA] mb-4">
             <span className="text-[11px] font-bold tracking-[0.14em] text-[#EA580C] uppercase font-sans">
-              Search Results
+              SEARCH RESULTS
             </span>
           </div>
 
@@ -102,7 +102,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
         {/* ========================================================================= */}
         <section className="w-full max-w-[940px] mx-auto px-4 sm:px-6 pb-20">
           {/* Meta Bar: Results Count & Sort Dropdown */}
-          <div className="flex items-center justify-between pb-4 border-b border-[#E2E8F0]/70 mb-4">
+          <div className="flex items-center justify-between mb-4">
             <div className="text-[15px] font-bold text-[#0F172A]">
               {totalCount} {totalCount === 1 ? "result" : "results"}
             </div>

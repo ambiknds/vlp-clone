@@ -157,7 +157,19 @@ export async function executeGroundedSearch(
   // Iterate over course hierarchy
   for (const course of courses) {
     const courseSlug = course.slug?.current || "courses";
-    const courseBadge = course.badgeIcon || "nextjs";
+    let courseBadge = course.badgeIcon || "";
+    if (!courseBadge) {
+      const cTitle = (course.title || "").toLowerCase();
+      if (cTitle.includes("next")) courseBadge = "nextjs";
+      else if (cTitle.includes("react")) courseBadge = "react";
+      else if (cTitle.includes("node")) courseBadge = "nodejs";
+      else if (cTitle.includes("javascript") || cTitle.includes("js")) courseBadge = "javascript";
+      else if (cTitle.includes("typescript") || cTitle.includes("ts")) courseBadge = "typescript";
+      else if (cTitle.includes("docker")) courseBadge = "docker";
+      else if (cTitle.includes("python")) courseBadge = "python";
+      else courseBadge = "nextjs";
+    }
+
     const modules = course.modules || [];
 
     modules.forEach((mod, modIdx) => {
@@ -220,8 +232,24 @@ export async function executeGroundedSearch(
             }
           }
 
+          // Also check if lesson title itself matches and video exists (even if chapters didn't explicitly match)
+          const lesTitleLower = (lesson.title || "").toLowerCase();
+          const titleMatches = tokens.filter((t) => lesTitleLower.includes(t)).length;
+          if (!bestChapter && !bestChunk && titleMatches > 0) {
+            bestChapter = {
+              startSeconds: 0,
+              label: lesson.title,
+              score: 75 + (titleMatches / tokens.length) * 15,
+            };
+          }
+
           if (bestChapter) {
             matchedCourseIds.add(course._id);
+            const videoDesc =
+              (lesson.notesText ? lesson.notesText.split("\n")[0].trim().slice(0, 160) : "") ||
+              (lesson.keyPoints && lesson.keyPoints[0]) ||
+              `Learn ${lesson.title} in ${course.title}.`;
+
             const videoResult: VideoSearchResult = {
               type: "video",
               id: `video-${lesson._id}-${bestChapter.startSeconds}`,
@@ -240,13 +268,19 @@ export async function executeGroundedSearch(
               matchedSecond: bestChapter.startSeconds,
               matchedTimestamp: formatDurationDisplay(bestChapter.startSeconds),
               matchedChapterLabel: bestChapter.label,
-              description: `Matched chapter: "${bestChapter.label}"`,
+              description: videoDesc,
               videoUrl: lesson.videoUrl || "",
               score: bestChapter.score,
             };
             results.push(videoResult);
           } else if (bestChunk) {
             matchedCourseIds.add(course._id);
+            const videoDesc =
+              (lesson.notesText ? lesson.notesText.split("\n")[0].trim().slice(0, 160) : "") ||
+              bestChunk.text ||
+              (lesson.keyPoints && lesson.keyPoints[0]) ||
+              `Learn ${lesson.title} in ${course.title}.`;
+
             const videoResult: VideoSearchResult = {
               type: "video",
               id: `video-${lesson._id}-${bestChunk.startSeconds}`,
@@ -264,7 +298,7 @@ export async function executeGroundedSearch(
               durationSeconds: lessonDurationSeconds,
               matchedSecond: bestChunk.startSeconds,
               matchedTimestamp: formatDurationDisplay(bestChunk.startSeconds),
-              description: bestChunk.text,
+              description: videoDesc,
               videoUrl: lesson.videoUrl || "",
               score: bestChunk.score,
             };

@@ -1,0 +1,4 @@
+00:00 Introduction to Layouts vs Templates
+00:12 Preserving Component State Across Routes
+00:27 When to Choose Templates for Page Analytics
+00:45 Next Steps and Key Gotchas
