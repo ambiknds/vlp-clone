@@ -102,13 +102,13 @@ export function HeaderNav({
 
       <div className="flex items-center gap-3">
         {showSearch && (
-          <button
-            type="button"
+          <Link
+            href="/search"
             aria-label="Search"
             className="w-10 h-10 flex items-center justify-center rounded-full text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] transition-colors cursor-pointer"
           >
             <Search className="w-5 h-5 stroke-[1.75]" />
-          </button>
+          </Link>
         )}
         <button
           type="button"

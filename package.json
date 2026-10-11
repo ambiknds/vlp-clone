@@ -13,6 +13,8 @@
     "sanity:seed": "npm run seed --prefix studio"
   },
   "dependencies": {
+    "@ai-sdk/mcp": "^2.0.73",
+    "@ai-sdk/openai": "^4.0.91",
     "@clerk/nextjs": "^7.9.7",
     "@opentelemetry/api-logs": "^0.222.0",
     "@opentelemetry/exporter-logs-otlp-http": "^0.222.0",
@@ -22,6 +24,7 @@
     "@sanity/icons": "^5.2.2",
     "@sanity/image-url": "^2.1.1",
     "@sanity/vision": "^5.31.2",
+    "ai": "^7.0.137",
     "clsx": "^2.1.1",
     "lucide-react": "^1.45.0",
     "next": "16.3.5",
@@ -29,6 +32,7 @@
     "posthog-js": "^1.435.8",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "react-markdown": "^10.1.0",
     "sanity": "^5.31.2",
     "styled-components": "^6.5.3",
     "tailwind-merge": "^3.7.0"
