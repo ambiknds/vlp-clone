@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check, ChevronDown, Play } from "lucide-react";
 import posthog from "posthog-js";
+import { trackResumeUsed } from "@/lib/analytics/events";
 
 export interface SidebarLessonItem {
   id: string;
@@ -199,12 +200,18 @@ export function LessonSidebar({
                             <div className="min-w-0 flex flex-col">
                               <Link
                                 href={`/lessons/${lesson.slug}`}
-                                onClick={() =>
+                                onClick={() => {
                                   posthog.capture("lesson_sidebar_selected", {
                                     lesson_title: lesson.title,
                                     course_title: courseTitle,
-                                  })
-                                }
+                                  });
+                                  trackResumeUsed({
+                                    lesson_slug: lesson.slug,
+                                    lesson_title: lesson.title,
+                                    course_title: courseTitle,
+                                    source: "sidebar_resume",
+                                  });
+                                }}
                                 className={`truncate transition-colors ${
                                   isNowPlaying
                                     ? "font-bold text-[#0F172A]"

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import posthog from "posthog-js";
 
+import { trackSearchPerformed } from "@/lib/analytics/events";
+
 export function HeroSearchBar() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
@@ -13,6 +15,10 @@ export function HeroSearchBar() {
     e.preventDefault();
     const query = searchQuery.trim();
     if (query) {
+      trackSearchPerformed({
+        query,
+        source: "hero_search_bar",
+      });
       posthog.capture("learning_search_submitted", {
         query_length: query.length,
       });

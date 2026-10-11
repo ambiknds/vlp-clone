@@ -42,12 +42,7 @@ export function HeaderNav({
       posthog.reset();
     }
 
-    posthog.identify(user.id, {
-      ...(user.primaryEmailAddress?.emailAddress
-        ? { email: user.primaryEmailAddress.emailAddress }
-        : {}),
-      ...(user.fullName ? { name: user.fullName } : {}),
-    });
+    posthog.identify(user.id);
     identifiedUserId.current = user.id;
   }, [isLoaded, user]);
 

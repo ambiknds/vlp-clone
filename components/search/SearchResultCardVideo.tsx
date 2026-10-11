@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Play, PlayCircle, FileText, Folder, ChevronRight } from "lucide-react";
 import { CourseBadgeIcon } from "./CourseBadgeIcon";
 import type { VideoSearchResult } from "@/types/search";
-import posthog from "posthog-js";
+import { trackSearchResultOpened } from "@/lib/analytics/events";
 
 export function SearchResultCardVideo({
   result,
@@ -19,10 +19,11 @@ export function SearchResultCardVideo({
   const lessonUrl = `/lessons/${result.lessonSlug}?start=${result.matchedSecond}`;
 
   const handleResultClick = () => {
-    posthog.capture("search_result_clicked", {
+    trackSearchResultOpened({
       query,
       result_type: "video",
       lesson_slug: result.lessonSlug,
+      lesson_title: result.lessonTitle,
       course_title: result.courseTitle,
       start_seconds: result.matchedSecond,
       rank,

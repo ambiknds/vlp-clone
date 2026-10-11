@@ -8,6 +8,7 @@ import { CourseHero } from "@/components/course/CourseHero";
 import { WhatYouWillLearn } from "@/components/course/WhatYouWillLearn";
 import { CourseModulesList } from "@/components/course/CourseModulesList";
 import { StickyCourseProgress } from "@/components/course/StickyCourseProgress";
+import { CourseAnalyticsTracker } from "@/components/course/CourseAnalyticsTracker";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { courseBySlugQuery } from "@/sanity/lib/queries";
 import type { CourseDetail } from "@/types/sanity";
@@ -206,6 +207,15 @@ export default async function CourseDetailPage({ params }: PageProps) {
           "repeating-linear-gradient(45deg, transparent, transparent 18px, rgba(226, 232, 240, 0.45) 18px, rgba(226, 232, 240, 0.45) 19px)",
       }}
     >
+      {/* PostHog Course Analytics Tracker */}
+      <CourseAnalyticsTracker
+        courseSlug={slug}
+        courseTitle={pageTitle}
+        level={course.level}
+        moduleCount={pageModuleCount}
+        studentCount={pageStudentCount}
+      />
+
       {/* Top Navigation */}
       <HeaderNav
         activeTab="courses"
@@ -257,6 +267,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
       <StickyCourseProgress
         progressPercentage={35}
         firstLessonSlug={typeof firstLessonSlug === "string" ? firstLessonSlug : undefined}
+        courseSlug={slug}
       />
 
       {/* Atmospheric 3D stepped peach columns at bottom background */}

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { FileText, ExternalLink, ChevronRight } from "lucide-react";
 import { CourseBadgeIcon } from "./CourseBadgeIcon";
 import type { LessonSearchResult } from "@/types/search";
-import posthog from "posthog-js";
+import { trackSearchResultOpened } from "@/lib/analytics/events";
 
 export function SearchResultCardLesson({
   result,
@@ -19,10 +19,11 @@ export function SearchResultCardLesson({
   const lessonUrl = `/lessons/${result.lessonSlug}`;
 
   const handleResultClick = () => {
-    posthog.capture("search_result_clicked", {
+    trackSearchResultOpened({
       query,
       result_type: "lesson",
       lesson_slug: result.lessonSlug,
+      lesson_title: result.lessonTitle,
       course_title: result.courseTitle,
       rank,
     });

@@ -40,6 +40,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
   // Execute grounded search over courses, lessons, and video intelligence
   const searchResponse = await executeGroundedSearch(query, sort);
   const { totalCount, courseCount, results } = searchResponse;
+  const videoResultsCount = results.filter((r) => r.type === "video").length;
 
   return (
     <div
@@ -55,6 +56,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
         totalCount={totalCount}
         courseCount={courseCount}
         sort={sort}
+        videoResultsCount={videoResultsCount}
       />
 
       {/* Top Header Navigation */}

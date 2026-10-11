@@ -3,15 +3,18 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { trackResumeUsed } from "@/lib/analytics/events";
 
 interface StickyCourseProgressProps {
   progressPercentage?: number;
   firstLessonSlug?: string;
+  courseSlug?: string;
 }
 
 export function StickyCourseProgress({
   progressPercentage = 35,
   firstLessonSlug,
+  courseSlug = "",
 }: StickyCourseProgressProps) {
   const targetHref = firstLessonSlug ? `/lessons/${firstLessonSlug}` : "#course-content";
 
@@ -42,6 +45,13 @@ export function StickyCourseProgress({
         <div className="shrink-0 w-full sm:w-auto">
           <Link
             href={targetHref}
+            onClick={() => {
+              trackResumeUsed({
+                course_slug: courseSlug,
+                lesson_slug: firstLessonSlug,
+                source: "sticky_progress",
+              });
+            }}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 rounded-[14px] bg-[#D96B43] hover:bg-[#C25832] text-white font-medium text-[15px] shadow-sm hover:shadow transition-all duration-150 group cursor-pointer"
           >
             <span>Continue Learning</span>

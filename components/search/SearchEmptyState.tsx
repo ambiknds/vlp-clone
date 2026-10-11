@@ -1,8 +1,17 @@
-import React from "react";
+"use client";
+
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { Search, ArrowRight } from "lucide-react";
+import { trackSearchEmptyStateViewed } from "@/lib/analytics/events";
 
 export function SearchEmptyState({ query }: { query?: string }) {
+  useEffect(() => {
+    if (query) {
+      trackSearchEmptyStateViewed({ query });
+    }
+  }, [query]);
+
   const suggestedQueries = [
     "Next.js",
     "Server Components",

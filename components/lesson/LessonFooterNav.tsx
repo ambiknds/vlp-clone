@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import posthog from "posthog-js";
+import { trackLessonCompleted } from "@/lib/analytics/events";
 
 interface LessonNavTarget {
   title: string;
@@ -15,12 +16,16 @@ interface LessonFooterNavProps {
   previousLesson?: LessonNavTarget | null;
   nextLesson?: LessonNavTarget | null;
   currentLessonTitle?: string;
+  currentLessonSlug?: string;
+  courseTitle?: string;
 }
 
 export function LessonFooterNav({
   previousLesson,
   nextLesson,
   currentLessonTitle,
+  currentLessonSlug = "",
+  courseTitle = "",
 }: LessonFooterNavProps) {
   return (
     <footer className="w-full pt-8 pb-16 mt-8 border-t border-[#E2E8F0] flex flex-col sm:flex-row items-center justify-between gap-4 font-sans">
@@ -73,13 +78,19 @@ export function LessonFooterNav({
 
           <Link
             href={`/lessons/${nextLesson.slug}`}
-            onClick={() =>
+            onClick={() => {
+              trackLessonCompleted({
+                lesson_slug: currentLessonSlug,
+                lesson_title: currentLessonTitle,
+                course_title: courseTitle,
+                completion_trigger: "next_lesson_click",
+              });
               posthog.capture("lesson_navigated", {
                 from: currentLessonTitle,
                 to: nextLesson.title,
                 direction: "next",
-              })
-            }
+              });
+            }}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#EA580C] hover:bg-[#D94E07] text-white rounded-[12px] text-[14px] font-medium shadow-xs hover:shadow-sm transition-all cursor-pointer shrink-0"
           >
             <span>Next Lesson</span>

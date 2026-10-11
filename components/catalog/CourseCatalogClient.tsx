@@ -86,6 +86,12 @@ export function CourseCatalogClient({ courses, categories }: CourseCatalogClient
               <Link
                 key={course._id}
                 href={href}
+                onClick={() =>
+                  posthog.capture("course_card_clicked", {
+                    course_title: displayTitle,
+                    course_slug: slug,
+                  })
+                }
                 className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] rounded-[16px]"
               >
                 <CourseCard

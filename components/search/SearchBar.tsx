@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, X } from "lucide-react";
 
+import { trackSearchPerformed } from "@/lib/analytics/events";
+
 export function SearchBar({
   initialQuery = "",
   placeholder = "Search lessons, topics, or timestamps...",
@@ -42,6 +44,11 @@ export function SearchBar({
     const trimmed = value.trim();
     if (trimmed) {
       const currentSort = searchParams.get("sort");
+      trackSearchPerformed({
+        query: trimmed,
+        sort: currentSort || "relevance",
+        source: "search_bar",
+      });
       const url = currentSort
         ? `/search?q=${encodeURIComponent(trimmed)}&sort=${encodeURIComponent(currentSort)}`
         : `/search?q=${encodeURIComponent(trimmed)}`;

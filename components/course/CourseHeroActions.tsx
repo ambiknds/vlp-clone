@@ -5,6 +5,8 @@ import Link from "next/link";
 import { ArrowRight, Bookmark } from "lucide-react";
 import posthog from "posthog-js";
 
+import { trackResumeUsed } from "@/lib/analytics/events";
+
 interface CourseHeroActionsProps {
   courseSlug: string;
   firstLessonSlug?: string;
@@ -30,11 +32,16 @@ export function CourseHeroActions({ courseSlug, firstLessonSlug }: CourseHeroAct
     <div className="flex flex-wrap items-center gap-3.5 pt-2">
       <Link
         href={targetHref}
-        onClick={() =>
+        onClick={() => {
           posthog.capture("course_learning_started", {
             course_slug: courseSlug,
-          })
-        }
+          });
+          trackResumeUsed({
+            course_slug: courseSlug,
+            lesson_slug: firstLessonSlug,
+            source: "course_hero",
+          });
+        }}
         className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-[14px] bg-[#D96B43] hover:bg-[#C25832] text-white font-medium text-[15px] shadow-sm hover:shadow transition-all duration-150 group cursor-pointer"
       >
         <span>Continue Learning</span>

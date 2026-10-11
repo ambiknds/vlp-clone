@@ -7,6 +7,7 @@ import { LessonVideoPlayer } from "@/components/lesson/LessonVideoPlayer";
 import { LessonTabs } from "@/components/lesson/LessonTabs";
 import { LessonSidebar, type SidebarModuleItem } from "@/components/lesson/LessonSidebar";
 import { LessonFooterNav } from "@/components/lesson/LessonFooterNav";
+import { LessonAnalyticsTracker } from "@/components/lesson/LessonAnalyticsTracker";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { lessonBySlugQuery } from "@/sanity/lib/queries";
 import type { PortableTextBlock } from "@portabletext/react";
@@ -294,6 +295,17 @@ export default async function LessonPage({ params, searchParams }: PageProps) {
             "repeating-linear-gradient(45deg, transparent, transparent 18px, rgba(226, 232, 240, 0.45) 18px, rgba(226, 232, 240, 0.45) 19px)",
         }}
       >
+        {/* PostHog Lesson Analytics Tracker */}
+        <LessonAnalyticsTracker
+          lessonSlug={querySlug}
+          lessonTitle={lessonTitle}
+          courseTitle={courseTitle}
+          courseSlug={courseSlug}
+          duration={duration}
+          level={level}
+          startSeconds={startSeconds}
+        />
+
         {/* Top Navigation */}
         <HeaderNav
           activeTab="courses"
@@ -332,6 +344,8 @@ export default async function LessonPage({ params, searchParams }: PageProps) {
               videoUrl={videoUrl}
               startSeconds={startSeconds}
               title={lessonTitle}
+              lessonSlug={querySlug}
+              courseTitle={courseTitle}
             />
 
             <LessonTabs
@@ -347,6 +361,8 @@ export default async function LessonPage({ params, searchParams }: PageProps) {
               previousLesson={previousLesson}
               nextLesson={nextLesson}
               currentLessonTitle={lessonTitle}
+              currentLessonSlug={querySlug}
+              courseTitle={courseTitle}
             />
           </div>
         </main>
@@ -425,6 +441,17 @@ export default async function LessonPage({ params, searchParams }: PageProps) {
           "repeating-linear-gradient(45deg, transparent, transparent 18px, rgba(226, 232, 240, 0.45) 18px, rgba(226, 232, 240, 0.45) 19px)",
       }}
     >
+      {/* PostHog Lesson Analytics Tracker */}
+      <LessonAnalyticsTracker
+        lessonSlug={querySlug}
+        lessonTitle={lesson.title}
+        courseTitle={courseTitle}
+        courseSlug={courseSlug}
+        duration={lesson.duration}
+        level={course?.level || "Intermediate"}
+        startSeconds={startSeconds}
+      />
+
       {/* Top Navigation */}
       <HeaderNav
         activeTab="courses"
@@ -463,6 +490,9 @@ export default async function LessonPage({ params, searchParams }: PageProps) {
             videoUrl={videoUrl}
             startSeconds={startSeconds}
             title={lesson.title}
+            lessonSlug={querySlug}
+            courseTitle={courseTitle}
+            durationSeconds={lesson.durationSeconds}
           />
 
           <LessonTabs
@@ -478,6 +508,8 @@ export default async function LessonPage({ params, searchParams }: PageProps) {
             previousLesson={previousLesson}
             nextLesson={nextLesson}
             currentLessonTitle={lesson.title}
+            currentLessonSlug={querySlug}
+            courseTitle={courseTitle}
           />
         </div>
       </main>

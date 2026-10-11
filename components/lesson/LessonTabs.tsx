@@ -6,6 +6,7 @@ import { PortableText } from "@/components/ui/PortableText";
 import type { PortableTextBlock } from "@portabletext/react";
 import type { Resource } from "@/types/sanity";
 import posthog from "posthog-js";
+import { trackLessonResourceClicked } from "@/lib/analytics/events";
 
 interface LessonTabsProps {
   overview?: string;
@@ -145,6 +146,14 @@ export function LessonTabs({
                         href={resource.url || "#"}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={() =>
+                          trackLessonResourceClicked({
+                            lesson_title: lessonTitle,
+                            resource_title: resource.title,
+                            resource_type: resource.type || "link",
+                            resource_url: resource.url || "",
+                          })
+                        }
                         className="bg-white border border-[#E2E8F0] hover:border-[#CBD5E1] rounded-[16px] p-5 flex flex-col justify-between shadow-2xs hover:shadow-xs transition-all duration-150 group"
                       >
                         <div>
