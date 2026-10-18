@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 
+import { LearnerProgressProvider } from "@/components/providers/LearnerProgressProvider";
+
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
@@ -32,7 +34,9 @@ export default function RootLayout({
     >
       <body className="min-h-full font-sans bg-[#FAFAFC] text-[#0F172A]">
         <ClerkProvider>
-          {children}
+          <LearnerProgressProvider>
+            {children}
+          </LearnerProgressProvider>
         </ClerkProvider>
       </body>
     </html>

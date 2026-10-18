@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check, ChevronDown, Play } from "lucide-react";
 import posthog from "posthog-js";
 import { trackResumeUsed } from "@/lib/analytics/events";
+import { useLearnerProgress } from "@/components/providers/LearnerProgressProvider";
 
 export interface SidebarLessonItem {
   id: string;
@@ -30,6 +31,7 @@ interface LessonSidebarProps {
   currentModuleIndex: number;
   currentLessonSlug: string;
   modules: SidebarModuleItem[];
+  courseLessonSlugs?: string[];
   className?: string;
 }
 
@@ -37,12 +39,29 @@ export function LessonSidebar({
   courseTitle,
   courseSlug,
   badgeIcon = "nextjs",
-  progressPercentage = 35,
+  progressPercentage,
   currentModuleIndex,
   currentLessonSlug,
   modules,
+  courseLessonSlugs,
   className = "",
 }: LessonSidebarProps) {
+  const { isLessonCompleted, getCourseProgress } = useLearnerProgress();
+
+  // Collect all lesson slugs in this course for accurate percentage calculation
+  const allSidebarLessonSlugs = useMemo(() => {
+    if (courseLessonSlugs && courseLessonSlugs.length > 0) {
+      return courseLessonSlugs;
+    }
+    return modules.flatMap((m) => m.lessons.map((l) => l.slug)).filter(Boolean);
+  }, [courseLessonSlugs, modules]);
+
+  const courseProgress = getCourseProgress(allSidebarLessonSlugs);
+  const displayPercentage =
+    allSidebarLessonSlugs.length > 0
+      ? courseProgress.percentage
+      : (progressPercentage ?? 0);
+
   // Track expanded state for each module; default the current active module to expanded
   const [expandedModules, setExpandedModules] = useState<Record<number, boolean>>({
     [currentModuleIndex]: true,
@@ -92,7 +111,7 @@ export function LessonSidebar({
             {courseTitle}
           </h2>
           <span className="text-[12.5px] text-[#64748B] font-medium">
-            {progressPercentage}% complete
+            {displayPercentage}% complete
           </span>
         </div>
       </div>
@@ -109,7 +128,11 @@ export function LessonSidebar({
       <div className="flex flex-col gap-2">
         {modules.map((module, idx) => {
           const isCurrentModule = idx === currentModuleIndex;
-          const isCompleted = idx < currentModuleIndex;
+          const isModuleAllCompleted =
+            module.lessons &&
+            module.lessons.length > 0 &&
+            module.lessons.every((l) => isLessonCompleted(l.slug));
+          const isCompleted = isModuleAllCompleted;
           const isExpanded = Boolean(expandedModules[idx]);
           const modNumber = module.moduleNumber || idx + 1;
 
@@ -161,8 +184,8 @@ export function LessonSidebar({
                 {/* Right Status / Indicator */}
                 <div className="shrink-0 flex items-center pl-2">
                   {isCompleted ? (
-                    <div className="w-5 h-5 rounded-full border border-[#EA580C] text-[#EA580C] flex items-center justify-center">
-                      <Check className="w-3 h-3 stroke-[2.5]" />
+                    <div className="w-5 h-5 rounded-full border border-[#10B981] bg-[#10B981] text-white flex items-center justify-center">
+                      <Check className="w-3 h-3 stroke-[3]" />
                     </div>
                   ) : (
                     <ChevronDown
@@ -179,9 +202,8 @@ export function LessonSidebar({
                 <div className="pl-6 pr-3 pb-3 pt-0.5 flex flex-col gap-1 border-t border-[#F1F5F9]/80 bg-[#FAFAF9]/40">
                   <div className="relative pl-4 border-l-2 border-[#E2E8F0] flex flex-col gap-2.5 my-1">
                     {module.lessons.map((lesson) => {
-                      const isNowPlaying =
-                        lesson.slug === currentLessonSlug ||
-                        (isCurrentModule && lesson.slug.includes("caching"));
+                      const isNowPlaying = lesson.slug === currentLessonSlug;
+                      const isCompletedLesson = isLessonCompleted(lesson.slug);
 
                       return (
                         <div
@@ -189,8 +211,12 @@ export function LessonSidebar({
                           className="flex items-center justify-between text-[13px] group py-1"
                         >
                           <div className="flex items-start gap-2.5 min-w-0">
-                            {/* Dot indicator */}
-                            {isNowPlaying ? (
+                            {/* Dot / Check indicator */}
+                            {isCompletedLesson ? (
+                              <div className="w-4 h-4 rounded-full bg-[#10B981]/15 text-[#10B981] flex items-center justify-center shrink-0 mt-0.5">
+                                <Check className="w-2.5 h-2.5 stroke-[3]" />
+                              </div>
+                            ) : isNowPlaying ? (
                               <span className="w-2.5 h-2.5 rounded-full bg-[#EA580C] shrink-0 mt-1 shadow-2xs" />
                             ) : (
                               <span className="w-2 h-2 rounded-full border border-[#94A3B8] bg-white shrink-0 mt-1.5 group-hover:border-[#EA580C]" />
@@ -215,7 +241,9 @@ export function LessonSidebar({
                                 className={`truncate transition-colors ${
                                   isNowPlaying
                                     ? "font-bold text-[#0F172A]"
-                                    : "font-medium text-[#475569] hover:text-[#0F172A]"
+                                    : isCompletedLesson
+                                      ? "font-medium text-[#475569] hover:text-[#0F172A]"
+                                      : "font-medium text-[#475569] hover:text-[#0F172A]"
                                 }`}
                               >
                                 {lesson.title}

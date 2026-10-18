@@ -199,6 +199,16 @@ export default async function CourseDetailPage({ params }: PageProps) {
         lessons: m.lessons,
       }));
 
+  // Extract all lesson slugs belonging to this course
+  const courseLessonSlugs: string[] = (course.modules || [])
+    .flatMap((m) =>
+      (m.lessons || []).map((l) => {
+        const slugVal = l.slug as { current?: string } | string | undefined;
+        return typeof slugVal === "string" ? slugVal : slugVal?.current;
+      })
+    )
+    .filter((s): s is string => Boolean(s));
+
   return (
     <div
       className="min-h-screen flex flex-col bg-[#FAF8F5] text-[#0F172A] selection:bg-[#FED7AA] selection:text-[#9A3412] relative overflow-x-hidden"
@@ -265,9 +275,9 @@ export default async function CourseDetailPage({ params }: PageProps) {
 
       {/* Sticky Bottom Progress Banner */}
       <StickyCourseProgress
-        progressPercentage={35}
         firstLessonSlug={typeof firstLessonSlug === "string" ? firstLessonSlug : undefined}
         courseSlug={slug}
+        courseLessonSlugs={courseLessonSlugs}
       />
 
       {/* Atmospheric 3D stepped peach columns at bottom background */}

@@ -287,6 +287,16 @@ export default async function LessonPage({ params, searchParams }: PageProps) {
       duration: "1h 18m",
     };
 
+    const nextCourseLessonSlugs = Array.from(
+      new Set(
+        NEXTJS_MODULE_5_LESSONS.map((l) => l.slug).concat([
+          previousLesson.slug,
+          nextLesson.slug,
+          querySlug,
+        ])
+      )
+    );
+
     return (
       <div
         className="min-h-screen flex flex-col bg-[#FAF8F5] text-[#0F172A] selection:bg-[#FED7AA] selection:text-[#9A3412] relative overflow-x-hidden"
@@ -320,10 +330,10 @@ export default async function LessonPage({ params, searchParams }: PageProps) {
             courseTitle={courseTitle}
             courseSlug={courseSlug}
             badgeIcon="nextjs"
-            progressPercentage={35}
             currentModuleIndex={4} // Module 5 (0-indexed)
             currentLessonSlug={querySlug}
             modules={sidebarModules}
+            courseLessonSlugs={nextCourseLessonSlugs}
           />
 
           {/* Right Main Lesson Area */}
@@ -346,6 +356,7 @@ export default async function LessonPage({ params, searchParams }: PageProps) {
               title={lessonTitle}
               lessonSlug={querySlug}
               courseTitle={courseTitle}
+              courseSlug={courseSlug}
             />
 
             <LessonTabs
@@ -363,6 +374,7 @@ export default async function LessonPage({ params, searchParams }: PageProps) {
               currentLessonTitle={lessonTitle}
               currentLessonSlug={querySlug}
               courseTitle={courseTitle}
+              courseSlug={courseSlug}
             />
           </div>
         </main>
@@ -466,10 +478,10 @@ export default async function LessonPage({ params, searchParams }: PageProps) {
           courseTitle={courseTitle}
           courseSlug={courseSlug}
           badgeIcon={badgeIcon}
-          progressPercentage={25}
           currentModuleIndex={foundModuleIndex}
           currentLessonSlug={querySlug}
           modules={sidebarModules}
+          courseLessonSlugs={allLessonsFlat.map((l) => l.slug).filter(Boolean)}
         />
 
         {/* Right Main Lesson Area */}
@@ -492,6 +504,7 @@ export default async function LessonPage({ params, searchParams }: PageProps) {
             title={lesson.title}
             lessonSlug={querySlug}
             courseTitle={courseTitle}
+            courseSlug={courseSlug}
             durationSeconds={lesson.durationSeconds}
           />
 
@@ -510,6 +523,7 @@ export default async function LessonPage({ params, searchParams }: PageProps) {
             currentLessonTitle={lesson.title}
             currentLessonSlug={querySlug}
             courseTitle={courseTitle}
+            courseSlug={courseSlug}
           />
         </div>
       </main>

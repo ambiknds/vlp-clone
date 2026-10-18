@@ -5,8 +5,8 @@ import {
   trackVideoPlayed,
   trackVideoWatchDepth,
   trackResumeUsed,
-  trackLessonCompleted,
 } from "@/lib/analytics/events";
+import { useLearnerProgress } from "@/components/providers/LearnerProgressProvider";
 
 interface LessonVideoPlayerProps {
   videoUrl: string;
@@ -15,6 +15,7 @@ interface LessonVideoPlayerProps {
   thumbnailUrl?: string;
   lessonSlug?: string;
   courseTitle?: string;
+  courseSlug?: string;
   durationSeconds?: number;
 }
 
@@ -84,8 +85,10 @@ export function LessonVideoPlayer({
   title = "Lesson video player",
   lessonSlug = "",
   courseTitle = "",
+  courseSlug = "",
   durationSeconds,
 }: LessonVideoPlayerProps) {
+  const { markLessonCompleted } = useLearnerProgress();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const provider = useMemo(() => detectProvider(videoUrl), [videoUrl]);
   const embedUrl = useMemo(
@@ -156,17 +159,20 @@ export function LessonVideoPlayer({
           });
 
           if (m === 100) {
-            trackLessonCompleted({
-              lesson_slug: lessonSlug,
-              lesson_title: title,
-              course_title: courseTitle,
-              completion_trigger: "video_ended",
-            });
+            if (lessonSlug) {
+              markLessonCompleted({
+                lessonSlug,
+                courseSlug,
+                lessonTitle: title,
+                courseTitle,
+                completionTrigger: "video_ended",
+              });
+            }
           }
         }
       }
     },
-    [lessonSlug, title, courseTitle, videoUrl, provider]
+    [lessonSlug, title, courseTitle, courseSlug, videoUrl, provider, markLessonCompleted]
   );
 
   // Listen to postMessage from YouTube and Vimeo embeds

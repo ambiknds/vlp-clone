@@ -4,19 +4,31 @@ import React from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { trackResumeUsed } from "@/lib/analytics/events";
+import { useLearnerProgress } from "@/components/providers/LearnerProgressProvider";
 
 interface StickyCourseProgressProps {
   progressPercentage?: number;
   firstLessonSlug?: string;
   courseSlug?: string;
+  courseLessonSlugs?: string[];
 }
 
 export function StickyCourseProgress({
-  progressPercentage = 35,
+  progressPercentage,
   firstLessonSlug,
   courseSlug = "",
+  courseLessonSlugs,
 }: StickyCourseProgressProps) {
-  const targetHref = firstLessonSlug ? `/lessons/${firstLessonSlug}` : "#course-content";
+  const { getCourseProgress } = useLearnerProgress();
+  const progress = getCourseProgress(courseLessonSlugs);
+
+  const displayPercentage =
+    courseLessonSlugs && courseLessonSlugs.length > 0
+      ? progress.percentage
+      : (progressPercentage ?? 0);
+
+  const targetLessonSlug = progress.firstIncompleteSlug || firstLessonSlug;
+  const targetHref = targetLessonSlug ? `/lessons/${targetLessonSlug}` : "#course-content";
 
   return (
     <div className="fixed bottom-4 left-0 right-0 z-40 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pointer-events-none">
@@ -27,7 +39,7 @@ export function StickyCourseProgress({
             Your Progress
           </span>
           <span className="text-[15px] sm:text-[16px] font-bold text-[#0F172A] tracking-tight font-sans">
-            {progressPercentage}% <span className="font-normal text-[#64748B]">complete</span>
+            {displayPercentage}% <span className="font-normal text-[#64748B]">complete</span>
           </span>
         </div>
 
@@ -36,7 +48,7 @@ export function StickyCourseProgress({
           <div className="w-full h-2.5 bg-[#E2E8F0] rounded-full overflow-hidden">
             <div
               className="h-full bg-[#D96B43] rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${progressPercentage}%` }}
+              style={{ width: `${displayPercentage}%` }}
             />
           </div>
         </div>
@@ -48,7 +60,7 @@ export function StickyCourseProgress({
             onClick={() => {
               trackResumeUsed({
                 course_slug: courseSlug,
-                lesson_slug: firstLessonSlug,
+                lesson_slug: targetLessonSlug,
                 source: "sticky_progress",
               });
             }}
