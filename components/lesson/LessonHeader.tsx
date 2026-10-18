@@ -40,7 +40,7 @@ export function LessonHeader({
     });
   };
 
-  const formattedStudents = studentCount.toLocaleString();
+  const formattedStudents = studentCount.toLocaleString("en-US");
 
   return (
     <div className="flex flex-col gap-3">
