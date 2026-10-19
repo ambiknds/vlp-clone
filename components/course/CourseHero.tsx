@@ -17,6 +17,7 @@ interface CourseHeroProps {
   badgeIcon?: string;
   courseSlug: string;
   firstLessonSlug?: string;
+  courseLessonSlugs?: string[];
 }
 
 // Metallic Next.js cover graphic matching vertex-course.png exactly
@@ -95,6 +96,7 @@ export function CourseHero({
   coverImage,
   courseSlug,
   firstLessonSlug,
+  courseLessonSlugs,
 }: CourseHeroProps) {
   const imageUrl = coverImage?.asset ? urlFor(coverImage).width(680).height(680).url() : null;
 
@@ -157,7 +159,12 @@ export function CourseHero({
         </div>
 
         {/* Action CTAs */}
-        <CourseHeroActions courseSlug={courseSlug} firstLessonSlug={firstLessonSlug} />
+        <CourseHeroActions
+          courseSlug={courseSlug}
+          courseTitle={title}
+          firstLessonSlug={firstLessonSlug}
+          courseLessonSlugs={courseLessonSlugs}
+        />
       </div>
     </section>
   );

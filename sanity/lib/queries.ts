@@ -267,3 +267,38 @@ export const homepageCoursesQuery = defineQuery(`
     "lessonCount": count(modules[].lessons[])
   }
 `)
+
+/**
+ * Fetches all courses with resolved lesson slugs for My Learning progress calculation.
+ */
+export const myLearningCoursesQuery = defineQuery(`
+  *[_type == "course"] | order(_createdAt desc) {
+    _id,
+    title,
+    slug,
+    summary,
+    coverImage,
+    badgeIcon,
+    level,
+    duration,
+    price,
+    popular,
+    studentCount,
+    "instructor": instructor->{
+      _id,
+      name,
+      expertise,
+      photo
+    },
+    "category": category->{
+      _id,
+      title,
+      slug
+    },
+    "moduleCount": count(modules),
+    "lessonCount": count(modules[].lessons[]),
+    "lessonSlugs": modules[].lessons[]->slug.current,
+    "firstLessonSlug": modules[0].lessons[0]->slug.current
+  }
+`)
+

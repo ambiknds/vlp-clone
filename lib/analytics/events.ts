@@ -20,6 +20,7 @@ export const POSTHOG_EVENTS = {
   LESSON_VIEWED: "lesson_viewed",
   SEARCH_EMPTY_STATE_VIEWED: "search_empty_state_viewed",
   LESSON_RESOURCE_CLICKED: "lesson_resource_clicked",
+  COURSE_ENROLLED: "course_enrolled",
 } as const;
 
 export type PostHogEventName = (typeof POSTHOG_EVENTS)[keyof typeof POSTHOG_EVENTS];
@@ -88,7 +89,7 @@ export interface ResumeUsedProps {
   course_slug?: string;
   course_title?: string;
   start_seconds?: number;
-  source: "course_hero" | "sticky_progress" | "video_timestamp_seek" | "sidebar_resume";
+  source: "course_hero" | "sticky_progress" | "video_timestamp_seek" | "sidebar_resume" | "my_learning";
 }
 
 // Lesson completed properties
@@ -192,4 +193,16 @@ export function trackSearchEmptyStateViewed(props: SearchEmptyStateProps) {
 export function trackLessonResourceClicked(props: LessonResourceClickedProps) {
   if (typeof window === "undefined") return;
   posthog.capture(POSTHOG_EVENTS.LESSON_RESOURCE_CLICKED, props);
+}
+
+// Course enrolled properties
+export interface CourseEnrolledProps {
+  course_slug: string;
+  course_title?: string;
+  source?: "course_hero" | "sticky_progress" | "catalog" | "my_learning";
+}
+
+export function trackCourseEnrolled(props: CourseEnrolledProps) {
+  if (typeof window === "undefined") return;
+  posthog.capture(POSTHOG_EVENTS.COURSE_ENROLLED, props);
 }

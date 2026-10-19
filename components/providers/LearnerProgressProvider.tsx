@@ -8,7 +8,8 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { trackLessonCompleted } from "@/lib/analytics/events";
+import { useUser } from "@clerk/nextjs";
+import { trackLessonCompleted, trackCourseEnrolled } from "@/lib/analytics/events";
 
 interface ProgressMutationParams {
   lessonSlug: string;
@@ -27,7 +28,10 @@ interface CourseProgressResult {
 
 interface LearnerProgressContextValue {
   completedLessons: Set<string>;
+  enrolledCourses: Set<string>;
   isLessonCompleted: (lessonSlug?: string) => boolean;
+  isCourseEnrolled: (courseSlug?: string) => boolean;
+  enrollCourse: (courseSlug: string, courseTitle?: string) => Promise<boolean>;
   markLessonCompleted: (params: ProgressMutationParams) => Promise<void>;
   unmarkLessonCompleted: (params: ProgressMutationParams) => Promise<void>;
   toggleLessonCompleted: (params: ProgressMutationParams) => Promise<void>;
@@ -35,27 +39,53 @@ interface LearnerProgressContextValue {
   isLoading: boolean;
 }
 
-const STORAGE_KEY = "vertex_completed_lessons";
+const STORAGE_KEY_LESSONS = "vertex_completed_lessons";
+const STORAGE_KEY_ENROLLED = "vertex_enrolled_courses";
+const PENDING_ENROLL_KEY = "vertex_pending_enrollment";
 
 const LearnerProgressContext = createContext<LearnerProgressContextValue | null>(null);
+
+function normalizeCourseSlug(slug?: string): string[] {
+  if (!slug) return [];
+  if (slug === "nextjs-for-production" || slug === "nextjs-app-router-in-depth") {
+    return ["nextjs-for-production", "nextjs-app-router-in-depth"];
+  }
+  return [slug];
+}
 
 export function LearnerProgressProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { isSignedIn, isLoaded: isUserLoaded } = useUser();
+
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(() => {
     if (typeof window === "undefined") return new Set();
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = localStorage.getItem(STORAGE_KEY_LESSONS);
       if (stored) {
         return new Set(JSON.parse(stored));
       }
     } catch {
-      // LocalStorage access failure fallback
+      // LocalStorage access fallback
     }
     return new Set();
   });
+
+  const [enrolledCourses, setEnrolledCourses] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_ENROLLED);
+      if (stored) {
+        return new Set(JSON.parse(stored));
+      }
+    } catch {
+      // LocalStorage access fallback
+    }
+    return new Set();
+  });
+
   const [isLoading, setIsLoading] = useState(true);
 
   // Sync with server if user is logged in
@@ -65,15 +95,33 @@ export function LearnerProgressProvider({
     fetch("/api/progress")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (!isMounted) return;
-        if (data?.completedLessonSlugs && Array.isArray(data.completedLessonSlugs)) {
+        if (!isMounted || !data) return;
+
+        // Sync completed lessons
+        if (data.completedLessonSlugs && Array.isArray(data.completedLessonSlugs)) {
           setCompletedLessons((prev) => {
             const next = new Set(prev);
             data.completedLessonSlugs.forEach((s: string) => next.add(s));
             try {
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(next)));
+              localStorage.setItem(STORAGE_KEY_LESSONS, JSON.stringify(Array.from(next)));
             } catch {
-              // Ignore storage quota errors
+              // Ignore storage quota
+            }
+            return next;
+          });
+        }
+
+        // Sync enrolled courses
+        if (data.enrolledCourseSlugs && Array.isArray(data.enrolledCourseSlugs)) {
+          setEnrolledCourses((prev) => {
+            const next = new Set(prev);
+            data.enrolledCourseSlugs.forEach((s: string) => {
+              normalizeCourseSlug(s).forEach((alias) => next.add(alias));
+            });
+            try {
+              localStorage.setItem(STORAGE_KEY_ENROLLED, JSON.stringify(Array.from(next)));
+            } catch {
+              // Ignore storage quota
             }
             return next;
           });
@@ -91,11 +139,19 @@ export function LearnerProgressProvider({
     return () => {
       isMounted = false;
     };
+  }, [isSignedIn]);
+
+  const saveLessonsToLocal = useCallback((updated: Set<string>) => {
+    try {
+      localStorage.setItem(STORAGE_KEY_LESSONS, JSON.stringify(Array.from(updated)));
+    } catch {
+      // Safe noop
+    }
   }, []);
 
-  const saveToLocal = useCallback((updated: Set<string>) => {
+  const saveEnrolledToLocal = useCallback((updated: Set<string>) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(updated)));
+      localStorage.setItem(STORAGE_KEY_ENROLLED, JSON.stringify(Array.from(updated)));
     } catch {
       // Safe noop
     }
@@ -108,6 +164,86 @@ export function LearnerProgressProvider({
     },
     [completedLessons]
   );
+
+  const isCourseEnrolled = useCallback(
+    (courseSlug?: string) => {
+      if (!courseSlug) return false;
+      const aliases = normalizeCourseSlug(courseSlug);
+      return aliases.some((alias) => enrolledCourses.has(alias));
+    },
+    [enrolledCourses]
+  );
+
+  const enrollCourse = useCallback(
+    async (courseSlug: string, courseTitle?: string): Promise<boolean> => {
+      if (!courseSlug) return false;
+
+      const aliases = normalizeCourseSlug(courseSlug);
+
+      // Optimistic client update
+      setEnrolledCourses((prev) => {
+        const next = new Set(prev);
+        aliases.forEach((alias) => next.add(alias));
+        saveEnrolledToLocal(next);
+        return next;
+      });
+
+      // Track PostHog client event
+      trackCourseEnrolled({
+        course_slug: courseSlug,
+        course_title: courseTitle,
+        source: "course_hero",
+      });
+
+      // Persist to server route
+      try {
+        const res = await fetch("/api/enroll", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            courseSlug,
+            courseTitle,
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.enrolledCourseSlugs && Array.isArray(data.enrolledCourseSlugs)) {
+            setEnrolledCourses((prev) => {
+              const next = new Set(prev);
+              data.enrolledCourseSlugs.forEach((s: string) => {
+                normalizeCourseSlug(s).forEach((alias) => next.add(alias));
+              });
+              saveEnrolledToLocal(next);
+              return next;
+            });
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to sync enrollment to server:", err);
+      }
+
+      return true;
+    },
+    [saveEnrolledToLocal]
+  );
+
+  // Auto-enroll if there was a pending enrollment waiting for authentication
+  useEffect(() => {
+    if (!isUserLoaded || !isSignedIn) return;
+
+    try {
+      const pendingCourse = localStorage.getItem(PENDING_ENROLL_KEY);
+      if (pendingCourse) {
+        localStorage.removeItem(PENDING_ENROLL_KEY);
+        setTimeout(() => {
+          enrollCourse(pendingCourse);
+        }, 0);
+      }
+    } catch {
+      // Ignore
+    }
+  }, [isUserLoaded, isSignedIn, enrollCourse]);
 
   const markLessonCompleted = useCallback(
     async ({
@@ -124,9 +260,19 @@ export function LearnerProgressProvider({
         if (prev.has(lessonSlug)) return prev;
         const next = new Set(prev);
         next.add(lessonSlug);
-        saveToLocal(next);
+        saveLessonsToLocal(next);
         return next;
       });
+
+      // Also ensure parent course is considered enrolled
+      if (courseSlug) {
+        setEnrolledCourses((prev) => {
+          const next = new Set(prev);
+          normalizeCourseSlug(courseSlug).forEach((alias) => next.add(alias));
+          saveEnrolledToLocal(next);
+          return next;
+        });
+      }
 
       // Track PostHog client event
       trackLessonCompleted({
@@ -153,7 +299,7 @@ export function LearnerProgressProvider({
         console.warn("Failed to sync progress to server:", err);
       }
     },
-    [saveToLocal]
+    [saveLessonsToLocal, saveEnrolledToLocal]
   );
 
   const unmarkLessonCompleted = useCallback(
@@ -170,7 +316,7 @@ export function LearnerProgressProvider({
         if (!prev.has(lessonSlug)) return prev;
         const next = new Set(prev);
         next.delete(lessonSlug);
-        saveToLocal(next);
+        saveLessonsToLocal(next);
         return next;
       });
 
@@ -191,7 +337,7 @@ export function LearnerProgressProvider({
         console.warn("Failed to sync progress reversal to server:", err);
       }
     },
-    [saveToLocal]
+    [saveLessonsToLocal]
   );
 
   const toggleLessonCompleted = useCallback(
@@ -246,7 +392,10 @@ export function LearnerProgressProvider({
   const value = useMemo(
     () => ({
       completedLessons,
+      enrolledCourses,
       isLessonCompleted,
+      isCourseEnrolled,
+      enrollCourse,
       markLessonCompleted,
       unmarkLessonCompleted,
       toggleLessonCompleted,
@@ -255,7 +404,10 @@ export function LearnerProgressProvider({
     }),
     [
       completedLessons,
+      enrolledCourses,
       isLessonCompleted,
+      isCourseEnrolled,
+      enrollCourse,
       markLessonCompleted,
       unmarkLessonCompleted,
       toggleLessonCompleted,

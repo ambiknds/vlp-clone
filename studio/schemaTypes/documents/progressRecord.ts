@@ -27,6 +27,17 @@ export const progressRecordType = defineType({
       ],
     }),
     defineField({
+      name: 'enrolledCourses',
+      title: 'Enrolled Courses',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'reference',
+          to: [{ type: 'course' }],
+        }),
+      ],
+    }),
+    defineField({
       name: 'lastLesson',
       title: 'Last Active Lesson',
       type: 'reference',

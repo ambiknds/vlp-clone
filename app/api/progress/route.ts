@@ -177,15 +177,43 @@ export async function GET() {
       `*[_id == $docId][0]{
         userId,
         "completedLessonSlugs": completedLessons[]->slug.current,
+        "enrolledCourseSlugs": enrolledCourses[]->slug.current,
         "lastLessonSlug": lastLesson->slug.current,
         lastPositionSeconds
       }`,
       { docId }
     );
 
+    const completedLessonSlugs: string[] = record?.completedLessonSlugs || [];
+    const enrolledCourseSlugs: string[] = record?.enrolledCourseSlugs || [];
+
+    // Also auto-derive courses where user completed any lesson, ensuring perfect coherence
+    if (completedLessonSlugs.length > 0) {
+      const activeCourses = await writeClient
+        .fetch<string[]>(
+          `*[_type == "course" && count((modules[].lessons[]->slug.current)[@ in $completedLessonSlugs]) > 0].slug.current`,
+          { completedLessonSlugs }
+        )
+        .catch(() => []);
+
+      for (const slug of activeCourses) {
+        if (slug && !enrolledCourseSlugs.includes(slug)) {
+          enrolledCourseSlugs.push(slug);
+        }
+      }
+    }
+
+    if (
+      enrolledCourseSlugs.includes("nextjs-app-router-in-depth") &&
+      !enrolledCourseSlugs.includes("nextjs-for-production")
+    ) {
+      enrolledCourseSlugs.push("nextjs-for-production");
+    }
+
     return NextResponse.json({
       userId,
-      completedLessonSlugs: record?.completedLessonSlugs || [],
+      completedLessonSlugs,
+      enrolledCourseSlugs,
       lastLessonSlug: record?.lastLessonSlug || null,
       lastPositionSeconds: record?.lastPositionSeconds || 0,
     });

@@ -258,6 +258,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
           coverImage={isNextCourse ? undefined : course.coverImage}
           badgeIcon={course.badgeIcon}
           firstLessonSlug={typeof firstLessonSlug === "string" ? firstLessonSlug : undefined}
+          courseLessonSlugs={courseLessonSlugs}
         />
 
         {/* What You'll Learn Section */}
@@ -277,6 +278,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
       <StickyCourseProgress
         firstLessonSlug={typeof firstLessonSlug === "string" ? firstLessonSlug : undefined}
         courseSlug={slug}
+        courseTitle={pageTitle}
         courseLessonSlugs={courseLessonSlugs}
       />
 
